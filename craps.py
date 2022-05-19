@@ -10,7 +10,6 @@ def shoot():
 def move():
     while True:
         val = shoot()
-        print("Dice roll:", val)
         if val == 7 or val == 11:
             return True
         if val == 2 or val == 3 or val == 12:
