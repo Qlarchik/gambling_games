@@ -3,27 +3,6 @@ import math
 import sys
 from art import *
 
-deck = {}
-discard = []
-
-suits = ['Spades', 'Clubs', 'Hearts', 'Diamonds']
-
-cardValues = {
-    'Ace': 1,
-    '2': 2,
-    '3': 3,
-    '4': 4,
-    '5': 5,
-    '6': 6,
-    '7': 7,
-    '8': 8,
-    '9': 9,
-    '10': 0,
-    'Jack': 0,
-    'Queen': 0,
-    'King': 0
-}
-
 
 def deck_generator():
     d = {}
@@ -33,7 +12,6 @@ def deck_generator():
     return d
 
 
-# Draw function
 def draw():
     global deck, discard
     while True:
@@ -47,13 +25,6 @@ def draw():
     return card, card_val
 
 
-bets = {
-    "Player": 0,
-    "Banker": 0,
-    "Tie": 0
-}
-
-
 def bet_prompt():
     global bank
     while True:
@@ -63,10 +34,7 @@ def bet_prompt():
             print("\tThat wasn't a number!")
             continue
         if bet > bank:
-            print("\tNot enough money. Do you want to add more to your balance?")
-            add_more = input(">")
-            if add_more.lower() in ['y', 'yes', 'atm', 'help', 'more money']:
-                out_of_money()
+            print("This is a lot for you, try again")
             continue
         elif bet <= 0:
             print("You have to make a bet to play!")
@@ -75,29 +43,8 @@ def bet_prompt():
             return bet
 
 
-def out_of_money():
-    global bank
-    if bank <= 0:
-        print("\tYou are totally out of money. Let's hit the ATM again and get you more cash. How much do you want?")
-    else:
-        print("\tYour chips are getting really low. How much would you like to add to your bankroll?")
-    while True:
-        try:
-            cash = int(input("\t$>"))
-        except ValueError:
-            print("\tYou forgot what numbers were and the ATM beeps at you in annoyance. Try again.")
-            continue
-        if cash <= 0:
-            print("\tWhat am I, a bank? This is for withdrawals only! Try again.")
-            continue
-        else:
-            bank += cash
-            break
-    print(f"\tAlright, starting you off again with {bank}. Don't lose it all this time!")
-
-
 def player_bet():
-    global bets, decisions
+    global bets, bet_decisions
     while True:
         for key in bets:
             if bets[key] > 0:
@@ -125,7 +72,7 @@ def player_bet():
                 bets[key] = 0
             continue
         elif choice == 'd':
-            print(f"Decision Table for the current game:\n{decisions}")
+            print(f"Decision Table for the current game:\n{bet_decisions}")
             continue
         elif choice == 'x':
             if bets["Tie"] > 0 or bets["Player"] > 0 or bets["Banker"] > 0:
@@ -140,16 +87,6 @@ def player_bet():
         else:
             print("That's not a choice! Try again!")
             continue
-
-
-def vig(bet):
-    total = bet * 0.05
-    if bet < 25:
-        commission = math.ceil(total)
-    else:
-        commission = math.floor(total)
-    print(f"${commission} paid to the House for the vig.")
-    return commission
 
 
 def payout(outcome):
@@ -175,7 +112,9 @@ def payout(outcome):
         if bets["Banker"] > 0:
             print("You won ${}!".format(bets["Banker"]))
             bank += bets["Banker"]
-            bank -= vig(bets["Banker"])
+            commission = math.floor(bets["Banker"] * 0.05)
+            bank -= commission
+            print(f"$You paid {commission} commission")
             bets["Banker"] = 0
         if bets["Tie"] > 0:
             print("You lost ${} from the Tie Bet.".format(bets["Tie"]))
@@ -191,7 +130,7 @@ def payout(outcome):
 
 
 def baccarat():
-    global playerHand, bankerHand, decisions, bank
+    global playerHand, bankerHand, bet_decisions, bank
     outcome = ''
     pHand = []
     bHand = []
@@ -267,7 +206,7 @@ def baccarat():
         print("Player draws {card} and now has {amount}.".format(card=p3card, amount=playerHand))
         if p3val in [2, 3] and bankerHand in range(5) or p3val in [4, 5] and bankerHand in range(6) or p3val in [6,
                                                                                                                  7] and bankerHand in range(
-                7) \
+            7) \
                 or p3val == 8 and bankerHand in range(3) or p3val in [0, 1, 9] and bankerHand in range(4):
             b3card, b3val = draw()
             bHand.append(b3val)
@@ -287,60 +226,79 @@ def baccarat():
         elif bankerHand > playerHand:
             print("Banker Wins!")
             outcome = 'b'
-    if len(decisions) <= 10:
-        decisions.append(outcome.upper())
+    if len(bet_decisions) <= 10:
+        bet_decisions.append(outcome.upper())
     else:
-        decisions.pop(0)
-        decisions.append(outcome.upper())
+        bet_decisions.pop(0)
+        bet_decisions.append(outcome.upper())
 
-    # Payout and Side Bets
     payout(outcome)
 
 
-decisions = []
-
-
-def burn():
-    i = 0
-    for i in range(10):
-        draw()
-        i += 1
-    print("\n\tBurning 10 Cards!\n")
-
-
-# Game start
 if __name__ == '__main__':
     Art = text2art("Baccarat")
     print(Art)
 
+    deck = {}
+    discard = []
+
+    suits = ['Spades', 'Clubs', 'Hearts', 'Diamonds']
+
+    cardValues = {
+        'Ace': 1,
+        '2': 2,
+        '3': 3,
+        '4': 4,
+        '5': 5,
+        '6': 6,
+        '7': 7,
+        '8': 8,
+        '9': 9,
+        '10': 0,
+        'Jack': 0,
+        'Queen': 0,
+        'King': 0
+    }
+
+    bets = {
+        "Player": 0,
+        "Banker": 0,
+        "Tie": 0
+    }
+
+    playerHand = 0
+    bankerHand = 0
+
+    bet_decisions = []
+
     deck = deck_generator()
     print("\n\tShuffling the Deck!\n")
-    burn()
 
     print("Enter your deposit")
     while True:
         try:
             bank = int(input("$"))
-            break
         except ValueError:
             print("That wasn't a number")
             continue
+        if bank <= 0:
+            print("Try again, but now enter a positive number")
+            continue
+        else:
+            break
     print(f"Great, starting off with {bank}. Good luck!")
-
-    playerHand = 0
-    bankerHand = 0
 
     while True:
 
         if bank <= 0:
-            out_of_money()
+            print("You lost all your money, bye!")
+            sys.exit()
 
         if len(deck) <= 10:
             deck = deck_generator()
             del discard[:]
-            print("\nShuffling the Deck!\n")
-            burn()
-            decisions = []
+            print("\nRefreshing deck...\n")
+            bet_decisions = []
             print(discard)
         # Betting
         print("Place your bets!")
@@ -349,5 +307,4 @@ if __name__ == '__main__':
         # Drawing hands
         baccarat()
         print(f"You now have ${bank} in your bank.\n\n")
-        # input("Hit Enter for the next hand...")
         continue
