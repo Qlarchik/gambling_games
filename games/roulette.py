@@ -28,7 +28,7 @@ def different_cases(section_count):
             losses += 1
         games = wins + losses
     percentage = round(wins / games * 100, 1)
-    print(f"Выиграно ставок: {wins} Проиграно: {losses} Всего сыграно игр: {games} Процент побед: {percentage}%")
+    print(f"Wins: {wins} Losses: {losses} Games: {games} Percentage: {percentage}%")
     return list1, list2
 
 
